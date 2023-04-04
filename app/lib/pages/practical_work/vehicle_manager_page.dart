@@ -20,8 +20,68 @@ class Vehicle {
 
 List<Vehicle> currentVehicles = [];
 
-bool yearIsValid(String year) {
-  return int.tryParse(year) != null;
+final dataValidatorServiceProvider = Provider<DataValidatorService>(
+  (ref) => const DataValidatorService(),
+);
+
+class DataValidatorService {
+  const DataValidatorService();
+
+  bool yearIsValid(String year) {
+    return int.tryParse(year) != null;
+  }
+
+  bool nameIsValid(String name) {
+    return name.isNotEmpty;
+  }
+}
+
+final vehicleManagerViewModelProvider = Provider<VehicleManagerViewModel>(
+  (ref) {
+    final dataValidatorService = ref.watch(dataValidatorServiceProvider);
+    return VehicleManagerViewModel(ref: ref, dataValidatorService: dataValidatorService);
+  },
+);
+
+class VehicleManagerViewModel {
+  const VehicleManagerViewModel({
+    required this.ref,
+    required this.dataValidatorService,
+  });
+
+  final Ref ref;
+  final DataValidatorService dataValidatorService;
+
+  void addVehicle({
+    required String name,
+    required String year,
+    required String description,
+  }) {
+    if (dataValidatorService.nameIsValid(name) && dataValidatorService.yearIsValid(year)) {
+      final vehicle = Vehicle(
+        id: const Uuid().v1(),
+        name: name,
+        year: year,
+        description: description,
+      );
+      ref.read(vehiclesProvider.notifier).update(
+            (old) => [
+              ...old,
+              vehicle,
+            ],
+          );
+    }
+  }
+
+  void deleteVehicle(String id) {
+    ref.read(vehiclesProvider.notifier).update((old) {
+      final copy = old.toList();
+      copy.removeWhere(
+        (element) => element.id == id,
+      );
+      return copy;
+    });
+  }
 }
 
 final showAddSectionProvider = StateProvider<bool>(
@@ -74,11 +134,8 @@ class _VehicleList extends ConsumerWidget {
           subtitle: Text(id),
           trailing: IconButton(
             onPressed: () {
-              ref.read(vehiclesProvider.notifier).update((old) {
-                final copy = old.toList();
-                copy.removeAt(index);
-                return copy;
-              });
+              final viewModel = ref.read(vehicleManagerViewModelProvider);
+              viewModel.deleteVehicle(id);
             },
             icon: const Icon(Icons.delete),
           ),
@@ -136,13 +193,10 @@ class _AddSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final showAddSection = ref.watch(showAddSectionProvider);
-
     if (!showAddSection) {
       return const SizedBox();
     }
-    final name = ref.watch(nameProvider);
-    final year = ref.watch(yearProvider);
-    final canAdd = name.isNotEmpty && yearIsValid(year);
+
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
@@ -173,28 +227,39 @@ class _AddSection extends ConsumerWidget {
               ref.read(descriptionProvider.notifier).state = value;
             },
           ),
-          AppButton(
-            text: 'Add',
-            onPressed: canAdd
-                ? () {
-                    final description = ref.read(descriptionProvider);
-                    final vehicle = Vehicle(
-                      id: const Uuid().v1(),
-                      name: name,
-                      year: year,
-                      description: description,
-                    );
-                    ref.read(vehiclesProvider.notifier).update(
-                          (old) => [
-                            ...old,
-                            vehicle,
-                          ],
-                        );
-                  }
-                : null,
-          ),
+          const _AddButton(),
         ],
       ),
+    );
+  }
+}
+
+final canAddProvider = StateProvider<bool>(
+  (ref) {
+    final dataValidatorService = ref.watch(dataValidatorServiceProvider);
+    final name = ref.watch(nameProvider);
+    final year = ref.watch(yearProvider);
+    return dataValidatorService.nameIsValid(name) && dataValidatorService.yearIsValid(year);
+  },
+);
+
+class _AddButton extends ConsumerWidget {
+  const _AddButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final canAdd = ref.watch(canAddProvider);
+    return AppButton(
+      text: 'Add',
+      onPressed: canAdd
+          ? () {
+              final name = ref.read(nameProvider);
+              final year = ref.read(yearProvider);
+              final description = ref.read(descriptionProvider);
+              final viewModel = ref.read(vehicleManagerViewModelProvider);
+              viewModel.addVehicle(name: name, year: year, description: description);
+            }
+          : null,
     );
   }
 }
