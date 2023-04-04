@@ -348,3 +348,91 @@ Et la lecture se fait en lui passant l’id :
 final id = ref.watch(idGetter);
 final uuid = ref.watch(familyUuidProvider(id));
 ```
+
+# Travaux pratiques
+
+Récupérer la branche tp/start. 
+Les questions suivantes vous guideront pour re-factoriser le code des fichiers `vehicle_manager_page.dart` et `vehicle_details_page.dart` en utilisant les concepts de Riverpod expliqués précédemment. A chaque question, vous ferez attention à l’optimisation du nombre de rebuild. Pour faire simple, pensez à découper en petit widget 😁 Quand les questions indiquent `Créer un widget`, il faut utiliser les composants visuels déjà présents, c’est principalement du refacto.
+
+## Q1 : Utiliser un StateProvider pour showAddSection
+
+- Remplacer le bool `showAddSection` géré via un StatefullWidget par un StateProvider (showAddSectionProvider)
+- Créer un widget (_AppBarButton) qui va afficher le button correspondant à la bonne action  dans l’appBar
+- Créer un widget (_AddSection) qui va soit afficher la section pour ajouter un véhicule soit renvoyer une SizedBox()
+
+A cette étape  `_AddSection` devrait toujours être un StatefullWidget
+
+## Q2 : Supprimer les StatefullWidgets
+
+- Dans `_VehicleManagerPage` utiliser un `StateProvider` pour stocker la liste de véhicules (vehiclesProvider)
+- Dans `_AddSection` remplacer les variables `name`, `year` et `description` par des `StateProvider`(nameProvider, yearProvider, descriptionProvider)
+- Créer un widget (_VehicleList) qui se charge d’afficher la listView des véhicules basé sur le state de `vehiclesProvider`
+
+A ce stade, vous ne devriez plus avoir de `StatefullWidget`
+
+<aside>
+💡 Attention quand vous utilisez Riverpod avec des listes. Le rebuild des widgets se base sur le `==`des classes. Si vous faites des add et des remove sur une liste Riverpod considère que c’est la même liste et donc ne va pas rebuild la UI.
+
+</aside>
+
+## Q3 : Créer des Services et des ViewModels
+
+Ici on souhaite créer des classes qui seront testables facilement et qui regroupe la partie métier de l’application.
+
+- Créer un service (DataValidatorService) qui permet de vérifier la validité des champs `name` et `year`. Puis utiliser le pattern Singleton de Riverpod pour rendre facilement disponible ce service.
+
+```dart
+class DataValidatorService {
+  const DataValidatorService();
+
+  bool yearIsValid(String year) {
+		...
+  }
+
+  bool nameIsValid(String name) {
+		...
+  }
+}
+```
+
+- Créer un ViewModel (VehicleManagerViewModel) qui permet d’ajouter ou de supprimer un véhicule. Puis utiliser le pattern Singleton de Riverpod pour rendre facilement disponible ce ViewModel.
+
+```dart
+class VehicleManagerViewModel {
+  const VehicleManagerViewModel({
+    required this.ref,
+    required this.dataValidatorService,
+  });
+
+  final Ref ref;
+  final DataValidatorService dataValidatorService;
+
+  void addVehicle({
+    required String name,
+    required String year,
+    required String description,
+  }) {
+		// TODO : Use dataValidatorService to validate parameters 
+    // and add the vehicle to the vehiclesProvider
+  }
+
+  void deleteVehicle(String id) {
+    // TODO : remove the vehicle from indicated by the id 
+    // from the vehiclesProvider
+  }
+}
+```
+
+- Utiliser le `VehicleManagerViewModel`pour ajouter ou supprimer un véhicule dans les boutons correspondant.
+- Créer un Provider composé (canAddProvider) qui à partir de `dataValidatorService`, `nameProvider`, `yearProvider` retourne un bool qui indique si on peut ajouter un véhicule.
+- Créer un widget (_AddButton) qui utilise le `canAddProvider` pour désactiver le bouton d’ajout.
+
+## Q4 : Utiliser un inherited provider
+
+- Sur la page de détails (VehicleDetailsPage), utiliser le pattern `InheritedProvider`pour transmettre le `vehicleId` dans toute la page (vehicleIdGetter).
+
+## Q5 : Utiliser le modifier family
+
+- Créer un `Provider.family` (vehicleProvider) qui à partir d’une String `vehicleId` et du `vehiclesProvider` permet de renvoyer le `Vehicle` associé.
+- Supprimer la variable globale `currentVehicles`
+- Utiliser `vehicleProvider` en combinaison avec des `select` dans les widgets qui affichent le détail d’un véhicule (_NameText, _YearText, _DescriptionText)
