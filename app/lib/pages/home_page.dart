@@ -43,14 +43,20 @@ class _Layout extends StatelessWidget {
           onPressed: () {
             const ComposedProviderRoute().go(context);
           },
-          text: 'ComposedProvider',
+          text: 'Composed Provider',
         ),
         AppButton(
           onPressed: () {
             final id = const Uuid().v1();
             InheritedProviderRoute(id: id).go(context);
           },
-          text: 'InheritedProvider',
+          text: 'Inherited Provider',
+        ),
+        AppButton(
+          onPressed: () {
+            const VehicleManagerRoute().go(context);
+          },
+          text: 'Practical Work',
         ),
       ],
     );

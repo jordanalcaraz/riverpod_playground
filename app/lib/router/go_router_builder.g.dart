@@ -15,16 +15,6 @@ GoRoute get $homeRoute => GoRouteData.$route(
       factory: $HomeRouteExtension._fromState,
       routes: [
         GoRouteData.$route(
-          path: 'items',
-          factory: $ItemsRouteExtension._fromState,
-          routes: [
-            GoRouteData.$route(
-              path: ':itemId',
-              factory: $DetailsRouteExtension._fromState,
-            ),
-          ],
-        ),
-        GoRouteData.$route(
           path: 'singleton',
           factory: $SingletonRouteExtension._fromState,
         ),
@@ -40,6 +30,16 @@ GoRoute get $homeRoute => GoRouteData.$route(
           path: 'inherited_providerP/:id',
           factory: $InheritedProviderRouteExtension._fromState,
         ),
+        GoRouteData.$route(
+          path: 'vehicle_manager',
+          factory: $VehicleManagerRouteExtension._fromState,
+          routes: [
+            GoRouteData.$route(
+              path: 'details/:vehicleId',
+              factory: $VehicleDetailsRouteExtension._fromState,
+            ),
+          ],
+        ),
       ],
     );
 
@@ -48,38 +48,6 @@ extension $HomeRouteExtension on HomeRoute {
 
   String get location => GoRouteData.$location(
         '/',
-      );
-
-  void go(BuildContext context) => context.go(location);
-
-  void push(BuildContext context) => context.push(location);
-
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-}
-
-extension $ItemsRouteExtension on ItemsRoute {
-  static ItemsRoute _fromState(GoRouterState state) => const ItemsRoute();
-
-  String get location => GoRouteData.$location(
-        '/items',
-      );
-
-  void go(BuildContext context) => context.go(location);
-
-  void push(BuildContext context) => context.push(location);
-
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-}
-
-extension $DetailsRouteExtension on DetailsRoute {
-  static DetailsRoute _fromState(GoRouterState state) => DetailsRoute(
-        itemId: state.params['itemId']!,
-      );
-
-  String get location => GoRouteData.$location(
-        '/items/${Uri.encodeComponent(itemId)}',
       );
 
   void go(BuildContext context) => context.go(location);
@@ -146,6 +114,40 @@ extension $InheritedProviderRouteExtension on InheritedProviderRoute {
 
   String get location => GoRouteData.$location(
         '/inherited_providerP/${Uri.encodeComponent(id)}',
+      );
+
+  void go(BuildContext context) => context.go(location);
+
+  void push(BuildContext context) => context.push(location);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+}
+
+extension $VehicleManagerRouteExtension on VehicleManagerRoute {
+  static VehicleManagerRoute _fromState(GoRouterState state) =>
+      const VehicleManagerRoute();
+
+  String get location => GoRouteData.$location(
+        '/vehicle_manager',
+      );
+
+  void go(BuildContext context) => context.go(location);
+
+  void push(BuildContext context) => context.push(location);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+}
+
+extension $VehicleDetailsRouteExtension on VehicleDetailsRoute {
+  static VehicleDetailsRoute _fromState(GoRouterState state) =>
+      VehicleDetailsRoute(
+        vehicleId: state.params['vehicleId']!,
+      );
+
+  String get location => GoRouteData.$location(
+        '/vehicle_manager/details/${Uri.encodeComponent(vehicleId)}',
       );
 
   void go(BuildContext context) => context.go(location);

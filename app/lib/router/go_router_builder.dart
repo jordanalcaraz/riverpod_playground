@@ -1,8 +1,8 @@
 import 'package:app/pages/composed_provider_page.dart';
-import 'package:app/pages/details_page.dart';
 import 'package:app/pages/home_page.dart';
 import 'package:app/pages/inherited_provider_page.dart';
-import 'package:app/pages/items_page.dart';
+import 'package:app/pages/practical_work/vehicle_details_page.dart';
+import 'package:app/pages/practical_work/vehicle_manager_page.dart';
 import 'package:app/pages/singleton_page.dart';
 import 'package:app/pages/state_provider_page.dart';
 import 'package:flutter/widgets.dart';
@@ -16,14 +16,6 @@ part 'go_router_builder.g.dart';
 @TypedGoRoute<HomeRoute>(
   path: '/',
   routes: <TypedGoRoute<GoRouteData>>[
-    TypedGoRoute<ItemsRoute>(
-      path: 'items',
-      routes: <TypedGoRoute<GoRouteData>>[
-        TypedGoRoute<DetailsRoute>(
-          path: ':itemId',
-        ),
-      ],
-    ),
     TypedGoRoute<SingletonRoute>(
       path: 'singleton',
     ),
@@ -35,6 +27,14 @@ part 'go_router_builder.g.dart';
     ),
     TypedGoRoute<InheritedProviderRoute>(
       path: 'inherited_providerP/:id',
+    ),
+    TypedGoRoute<VehicleManagerRoute>(
+      path: 'vehicle_manager',
+      routes: <TypedGoRoute<GoRouteData>>[
+        TypedGoRoute<VehicleDetailsRoute>(
+          path: 'details/:vehicleId',
+        ),
+      ],
     ),
   ],
 )
@@ -85,22 +85,22 @@ class InheritedProviderRoute extends GoRouteData {
   }
 }
 
-class ItemsRoute extends GoRouteData {
-  const ItemsRoute();
+class VehicleManagerRoute extends GoRouteData {
+  const VehicleManagerRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const ItemsPage();
+    return const VehicleManagerPage();
   }
 }
 
-class DetailsRoute extends GoRouteData {
-  const DetailsRoute({required this.itemId});
+class VehicleDetailsRoute extends GoRouteData {
+  const VehicleDetailsRoute({required this.vehicleId});
 
-  final String itemId;
+  final String vehicleId;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return DetailsPage(itemId: itemId);
+    return VehicleDetailsPage(vehicleId: vehicleId);
   }
 }
