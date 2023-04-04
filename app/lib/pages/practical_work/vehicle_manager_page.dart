@@ -28,15 +28,12 @@ final showAddSectionProvider = StateProvider<bool>(
   (ref) => false,
 );
 
-class VehicleManagerPage extends StatefulWidget {
+final vehiclesProvider = StateProvider<List<Vehicle>>(
+  (ref) => [],
+);
+
+class VehicleManagerPage extends StatelessWidget {
   const VehicleManagerPage({Key? key}) : super(key: key);
-
-  @override
-  State<VehicleManagerPage> createState() => _VehicleManagerPageState();
-}
-
-class _VehicleManagerPageState extends State<VehicleManagerPage> {
-  List<Vehicle> vehicles = [];
 
   @override
   Widget build(BuildContext context) {
@@ -48,45 +45,49 @@ class _VehicleManagerPageState extends State<VehicleManagerPage> {
         ],
       ),
       body: Column(
-        children: [
-          _AddSection(
-            onVehicleAdded: (vehicle) {
-              setState(() {
-                vehicles.add(
-                  vehicle,
-                );
-              });
-            },
-          ),
-          const Text('Vehicle list :'),
+        children: const [
+          _AddSection(),
+          Text('Vehicle list :'),
           Expanded(
-            child: ListView.separated(
-              separatorBuilder: (context, index) => const Divider(),
-              itemCount: vehicles.length,
-              itemBuilder: (BuildContext context, int index) {
-                final vehicle = vehicles[index];
-                final id = vehicle.id;
-                return ListTile(
-                  title: Text(vehicle.name),
-                  subtitle: Text(id),
-                  trailing: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        vehicles.removeAt(index);
-                      });
-                    },
-                    icon: const Icon(Icons.delete),
-                  ),
-                  onTap: () {
-                    currentVehicles = vehicles;
-                    VehicleDetailsRoute(vehicleId: id).go(context);
-                  },
-                );
-              },
-            ),
+            child: _VehicleList(),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _VehicleList extends ConsumerWidget {
+  const _VehicleList({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vehicles = ref.watch(vehiclesProvider);
+    return ListView.separated(
+      separatorBuilder: (context, index) => const Divider(),
+      itemCount: vehicles.length,
+      itemBuilder: (BuildContext context, int index) {
+        final vehicle = vehicles[index];
+        final id = vehicle.id;
+        return ListTile(
+          title: Text(vehicle.name),
+          subtitle: Text(id),
+          trailing: IconButton(
+            onPressed: () {
+              ref.read(vehiclesProvider.notifier).update((old) {
+                final copy = old.toList();
+                copy.removeAt(index);
+                return copy;
+              });
+            },
+            icon: const Icon(Icons.delete),
+          ),
+          onTap: () {
+            currentVehicles = vehicles;
+            VehicleDetailsRoute(vehicleId: id).go(context);
+          },
+        );
+      },
     );
   }
 }
@@ -115,30 +116,32 @@ class _AppBarButton extends ConsumerWidget {
   }
 }
 
-class _AddSection extends ConsumerStatefulWidget {
+final nameProvider = StateProvider<String>(
+  (ref) => '',
+);
+
+final yearProvider = StateProvider<String>(
+  (ref) => '',
+);
+
+final descriptionProvider = StateProvider<String>(
+  (ref) => '',
+);
+
+class _AddSection extends ConsumerWidget {
   const _AddSection({
     Key? key,
-    required this.onVehicleAdded,
   }) : super(key: key);
 
-  final void Function(Vehicle vehicle) onVehicleAdded;
-
   @override
-  ConsumerState<_AddSection> createState() => _AddSectionState();
-}
-
-class _AddSectionState extends ConsumerState<_AddSection> {
-  String name = '';
-  String year = '';
-  String description = '';
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final showAddSection = ref.watch(showAddSectionProvider);
 
     if (!showAddSection) {
       return const SizedBox();
     }
+    final name = ref.watch(nameProvider);
+    final year = ref.watch(yearProvider);
     final canAdd = name.isNotEmpty && yearIsValid(year);
     return Container(
       margin: const EdgeInsets.all(16),
@@ -151,9 +154,7 @@ class _AddSectionState extends ConsumerState<_AddSection> {
               hintText: 'Name',
             ),
             onChanged: (value) {
-              setState(() {
-                name = value;
-              });
+              ref.read(nameProvider.notifier).state = value;
             },
           ),
           TextField(
@@ -161,9 +162,7 @@ class _AddSectionState extends ConsumerState<_AddSection> {
               hintText: 'Year',
             ),
             onChanged: (value) {
-              setState(() {
-                year = value;
-              });
+              ref.read(yearProvider.notifier).state = value;
             },
           ),
           TextField(
@@ -171,22 +170,26 @@ class _AddSectionState extends ConsumerState<_AddSection> {
               hintText: 'Description',
             ),
             onChanged: (value) {
-              setState(() {
-                description = value;
-              });
+              ref.read(descriptionProvider.notifier).state = value;
             },
           ),
           AppButton(
             text: 'Add',
             onPressed: canAdd
                 ? () {
+                    final description = ref.read(descriptionProvider);
                     final vehicle = Vehicle(
                       id: const Uuid().v1(),
                       name: name,
                       year: year,
                       description: description,
                     );
-                    widget.onVehicleAdded(vehicle);
+                    ref.read(vehiclesProvider.notifier).update(
+                          (old) => [
+                            ...old,
+                            vehicle,
+                          ],
+                        );
                   }
                 : null,
           ),
