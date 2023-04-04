@@ -7,6 +7,13 @@ final vehicleIdGetter = Provider<String>(
   (ref) => throw UnimplementedError(),
 );
 
+final vehicleProvider = Provider.family<Vehicle?, String>(
+  (ref, vehicleId) {
+    final vehicles = ref.watch(vehiclesProvider);
+    return vehicles.firstWhereOrNull((element) => element.id == vehicleId);
+  },
+);
+
 class VehicleDetailsPage extends StatelessWidget {
   const VehicleDetailsPage({Key? key, required this.vehicleId}) : super(key: key);
 
@@ -70,8 +77,8 @@ class _NameText extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final vehicleId = ref.watch(vehicleIdGetter);
-    final vehicle = currentVehicles.firstWhereOrNull((element) => element.id == vehicleId);
-    return Text('name: ${vehicle?.name}');
+    final name = ref.watch(vehicleProvider(vehicleId).select((value) => value?.name ?? ''));
+    return Text('name: $name');
   }
 }
 
@@ -81,8 +88,8 @@ class _YearText extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final vehicleId = ref.watch(vehicleIdGetter);
-    final vehicle = currentVehicles.firstWhereOrNull((element) => element.id == vehicleId);
-    return Text('year: ${vehicle?.year}');
+    final year = ref.watch(vehicleProvider(vehicleId).select((value) => value?.year ?? ''));
+    return Text('year: $year');
   }
 }
 
@@ -92,7 +99,7 @@ class _DescriptionText extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final vehicleId = ref.watch(vehicleIdGetter);
-    final vehicle = currentVehicles.firstWhereOrNull((element) => element.id == vehicleId);
-    return Text('description: ${vehicle?.description}');
+    final description = ref.watch(vehicleProvider(vehicleId).select((value) => value?.description ?? ''));
+    return Text('description: $description');
   }
 }

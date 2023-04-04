@@ -18,8 +18,6 @@ class Vehicle {
   final String description;
 }
 
-List<Vehicle> currentVehicles = [];
-
 final dataValidatorServiceProvider = Provider<DataValidatorService>(
   (ref) => const DataValidatorService(),
 );
@@ -140,7 +138,6 @@ class _VehicleList extends ConsumerWidget {
             icon: const Icon(Icons.delete),
           ),
           onTap: () {
-            currentVehicles = vehicles;
             VehicleDetailsRoute(vehicleId: id).go(context);
           },
         );
