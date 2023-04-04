@@ -1,6 +1,11 @@
 import 'package:app/pages/practical_work/vehicle_manager_page.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final vehicleIdGetter = Provider<String>(
+  (ref) => throw UnimplementedError(),
+);
 
 class VehicleDetailsPage extends StatelessWidget {
   const VehicleDetailsPage({Key? key, required this.vehicleId}) : super(key: key);
@@ -9,89 +14,84 @@ class VehicleDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _Layout(
-      vehicleId: vehicleId,
+    return ProviderScope(
+      overrides: [
+        vehicleIdGetter.overrideWithValue(vehicleId),
+      ],
+      child: const _Layout(),
     );
   }
 }
 
 class _Layout extends StatelessWidget {
-  const _Layout({Key? key, required this.vehicleId}) : super(key: key);
-
-  final String vehicleId;
+  const _Layout({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('VehicleDetailsPage')),
-      body: _Body(vehicleId: vehicleId),
+      body: const _Body(),
     );
   }
 }
 
 class _Body extends StatelessWidget {
-  const _Body({Key? key, required this.vehicleId}) : super(key: key);
-
-  final String vehicleId;
+  const _Body({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          _IdText(vehicleId: vehicleId),
-          _NameText(vehicleId: vehicleId),
-          _YearText(vehicleId: vehicleId),
-          _DescriptionText(vehicleId: vehicleId),
+        children: const [
+          _IdText(),
+          _NameText(),
+          _YearText(),
+          _DescriptionText(),
         ],
       ),
     );
   }
 }
 
-class _IdText extends StatelessWidget {
-  const _IdText({Key? key, required this.vehicleId}) : super(key: key);
-
-  final String vehicleId;
+class _IdText extends ConsumerWidget {
+  const _IdText({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vehicleId = ref.watch(vehicleIdGetter);
     return Text('id: $vehicleId');
   }
 }
 
-class _NameText extends StatelessWidget {
-  const _NameText({Key? key, required this.vehicleId}) : super(key: key);
-
-  final String vehicleId;
+class _NameText extends ConsumerWidget {
+  const _NameText({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vehicleId = ref.watch(vehicleIdGetter);
     final vehicle = currentVehicles.firstWhereOrNull((element) => element.id == vehicleId);
     return Text('name: ${vehicle?.name}');
   }
 }
 
-class _YearText extends StatelessWidget {
-  const _YearText({Key? key, required this.vehicleId}) : super(key: key);
-
-  final String vehicleId;
+class _YearText extends ConsumerWidget {
+  const _YearText({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vehicleId = ref.watch(vehicleIdGetter);
     final vehicle = currentVehicles.firstWhereOrNull((element) => element.id == vehicleId);
     return Text('year: ${vehicle?.year}');
   }
 }
 
-class _DescriptionText extends StatelessWidget {
-  const _DescriptionText({Key? key, required this.vehicleId}) : super(key: key);
-
-  final String vehicleId;
+class _DescriptionText extends ConsumerWidget {
+  const _DescriptionText({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vehicleId = ref.watch(vehicleIdGetter);
     final vehicle = currentVehicles.firstWhereOrNull((element) => element.id == vehicleId);
     return Text('description: ${vehicle?.description}');
   }
