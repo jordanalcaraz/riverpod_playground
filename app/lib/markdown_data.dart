@@ -1,23 +1,4 @@
-# Utilisation de Riverpod
-
-# Introduction :
-
-Avant toutes choses, merci de parcourir la documentation de la librairie : [https://riverpod.dev/fr/](https://riverpod.dev/fr/)
-
-Riverpod est une librairie de gestion d'état pour Flutter qui offre des fonctionnalités avancées pour gérer l'état d’une application de manière efficace et réactive. Dans Riverpod, les providers sont la base. Un provider est un objet qui encapsule un état et qui permet d'écouter les changements de cet état. Il en existe plusieurs type et il est possible de les combiner.
-
-# Utilisation des providers
-
-Il existe plusieurs types de provider et nous allons voir dans les prochaines parties comment utiliser les différents types.
-
-## Lire un provider read or watch
-
-`ref.watch` : Permet d’obtenir la valeur d'un provider et écouter les changements, de sorte que lorsque cette valeur change, cela reconstruira le widget ou le provider qui s'est abonné à la valeur.
-
-`[ref.read](http://ref.read)` : Permet d’obtenir la valeur d'un provider tout en ignorant les changements. Cela est utile lorsque nous avons besoin de la valeur d'un provider dans un événement tel que "on click”.
-
-La règle est simple donc simple dans 99% des cas on utilise `ref.watch` dans les méthodes de build des widgets et lorsque l’on combine des providers alors que `[ref.read](http://ref.read)` est utile sur des actions ponctuelles (tap, initState, …)  
-
+const String singletonMarkdown = r"""
 ## Singleton
 
 Utiliser un `Provider`. C’est le plus basique de tous les providers. Il crée une valeur... Et c'est à peu près tout. 
@@ -81,7 +62,9 @@ class OtherService {
   }
 }
 ```
+""";
 
+const String stateProviderMarkdown = r"""
 ## StateProvider
 
 `StateProvider` est un provider qui expose un moyen de modifier son état. 
@@ -144,7 +127,9 @@ class ModifierService {
   }
 }
 ```
+""";
 
+const String composedProviderMarkdown = r"""
 ## Providers composés
 
 Il existe différents cas où on va avoir besoin de composer avec plusieurs Providers
@@ -249,8 +234,11 @@ Pour limiter le nombre de rebuild de chaque widget, il est important de respecte
 - Créer des `Provider` spécifiques ou utiliser les `select` pour ne cibler que la data qui a de l’influence sur la UI.
 
 </aside>
+""";
 
-## Provider en tant qu’`InheritedWidget`
+// ignore: prefer_single_quotes
+const String inheritedProviderMarkdown = r"""
+## Provider en tant qu'InheritedWidget
 
 ### Problématique
 
@@ -348,3 +336,4 @@ Et la lecture se fait en lui passant l’id :
 final id = ref.watch(idGetter);
 final uuid = ref.watch(familyUuidProvider(id));
 ```
+""";
